@@ -253,6 +253,7 @@ class BottomButtonsPlaylistScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        PlaybackRatePopup(offset: Offset(0, 0)),
         Builder(builder: (context) {
           final screenWidth = MediaQuery.of(context).size.width;
           if (screenWidth < 600) {
@@ -461,7 +462,7 @@ class ControlPanelPlayerScreen extends StatelessWidget {
                               sliderMusicBarCubit
                                   .resumeOnPositionChangedSubscription();
                             },
-                            trackLength: trackDuration.inMilliseconds,
+                            trackLength: trackDuration.inMilliseconds.toDouble(),
                             sliderValue: sliderValueInMilliseconds,
                           )),
                         ),

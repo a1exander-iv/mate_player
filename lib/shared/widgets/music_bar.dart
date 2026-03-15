@@ -1,7 +1,8 @@
-
+import 'dart:async';
 
 import 'package:flutter/material.dart' hide RepeatMode;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:mate_player/domain/models/track_model.dart';
@@ -9,6 +10,7 @@ import 'package:mate_player/l10n/generated/app_localizations.dart';
 import 'package:mate_player/presentation/cubits/favorite/favorite_cubit.dart';
 import 'package:mate_player/presentation/cubits/music_bar_slider/slider_music_bar_cubit.dart';
 import 'package:mate_player/presentation/cubits/picture/pictures_cubit.dart';
+import 'package:mate_player/presentation/cubits/playback_speed/playback_speed_cubit.dart';
 import 'package:mate_player/presentation/cubits/player/player_cubit.dart';
 import 'package:mate_player/presentation/cubits/short_info/track_short_info_cubit.dart';
 import 'package:mate_player/presentation/cubits/volume_slider/volume_slider_cubit.dart';
@@ -385,7 +387,7 @@ class ControlPanelMusicBar extends StatelessWidget {
                               sliderMusicBarCubit
                                   .resumeOnPositionChangedSubscription();
                             },
-                            trackLength: trackDuration.inMilliseconds,
+                            trackLength: trackDuration.inMilliseconds.toDouble(),
                             sliderValue: sliderValueInMilliseconds,
                           ),
                         ),
@@ -505,6 +507,8 @@ class AdditionalButtonsMusicBar extends StatefulWidget {
 }
 
 class _AdditionalButtonsMusicBarState extends State<AdditionalButtonsMusicBar> {
+
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -518,6 +522,7 @@ class _AdditionalButtonsMusicBarState extends State<AdditionalButtonsMusicBar> {
             GoRouter.of(context).pushNamed("player");
           },
         ),
+        PlaybackRatePopup(offset: Offset(100, -70),),
         IconButton(
           icon: const Icon(Icons.queue_music),
           onPressed: () async {
@@ -584,6 +589,7 @@ class SliderMusicBar extends StatelessWidget {
       this.onChangeStart,
       this.onChangeEnd,
       this.divisions,
+      this.min,
       required this.onChanged,
       required this.trackLength,
       required this.sliderValue});
@@ -592,8 +598,9 @@ class SliderMusicBar extends StatelessWidget {
   final void Function(double)? onChangeEnd;
   final void Function(double) onChanged;
   final double sliderValue;
-  final int trackLength;
+  final double trackLength;
   final int? divisions;
+  final double? min;
 
   @override
   Widget build(BuildContext context) {
@@ -613,7 +620,7 @@ class SliderMusicBar extends StatelessWidget {
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
             inactiveTrackColor: colorScheme.primary.withValues(alpha: 0.2)),
         child: Slider(
-          min: 0,
+          min: min ?? 0,
           label: divisions != null ?  sliderValue.toInt().toString() : null,
           divisions: divisions,
           max: trackLength.toDouble(),
@@ -624,5 +631,99 @@ class SliderMusicBar extends StatelessWidget {
             onChanged(value);
           },
         ));
+  }
+}
+
+class PlaybackRatePopup extends StatefulWidget {
+  const PlaybackRatePopup({super.key, required this.offset});
+  final Offset offset;
+
+  @override
+  State<PlaybackRatePopup> createState() => _PlaybackRatePopupState();
+}
+
+class _PlaybackRatePopupState extends State<PlaybackRatePopup> {
+
+  @override
+  Widget build(BuildContext context) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return PopupMenuButton(
+      tooltip: "",
+      offset: widget.offset,
+      icon: Icon(Icons.speed, color: colorScheme.onSurfaceVariant),
+      position: .over,
+      itemBuilder: (context) {
+          return [
+          PopupMenuItem(
+            enabled: false,
+            child: PlaybackRatePopupItem(),
+            ),
+        ];});
+  }
+}
+
+class PlaybackRatePopupItem extends StatefulWidget {
+  const PlaybackRatePopupItem({super.key});
+
+  @override
+  State<PlaybackRatePopupItem> createState() => _PlaybackRatePopupItemState();
+}
+
+class _PlaybackRatePopupItemState extends State<PlaybackRatePopupItem> {
+  Timer? closeTimer;
+  static const closeDuration = Duration(seconds: 3);
+
+  void _autoClose(BuildContext context) {
+    closeTimer?.cancel();
+    closeTimer = Timer(closeDuration, () {
+      if (mounted) {
+         Navigator.pop(context);
+      }
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    _autoClose(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return BlocBuilder<PlayerCubit, PlayerCubitState>(
+            builder: (context, playerState) {
+              return BlocBuilder<PlaybackSpeedCubit, PlaybackSpeedState>(
+                builder: (context, state) {
+                  //necessary to reset the slider value because audioplayer doesn't do this after switching audio tracks (match track and playbackrate)
+                  double sliderValue = state.sliderValue;
+                  if (playerState.source != state.playerAudioSource) {
+                    sliderValue = 1;
+                    context.read<PlaybackSpeedCubit>().changePlaybackSliderValue(1, playerState.source);
+                  }
+                  return Row(          
+                  mainAxisAlignment: .center,
+                  children: [
+                  Text("${sliderValue.toStringAsFixed(2)}x", style: TextStyle(color: colorScheme.onSurface),),
+                  Gap(4),
+                  SliderMusicBar(
+                  onChangeEnd: (value) {
+                    context.read<PlaybackSpeedCubit>().setPlaybackRate(value, playerState.source);
+                  },
+                  onChanged: (value) {
+                    context.read<PlaybackSpeedCubit>().changePlaybackSliderValue(value, playerState.source);
+                    _autoClose(context);
+                  },
+                  trackLength: 2, 
+                  min: 0.5,
+                  sliderValue: sliderValue)
+                ],);}
+              );}
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    closeTimer?.cancel();
   }
 }

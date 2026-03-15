@@ -18,6 +18,7 @@ import 'package:mate_player/presentation/cubits/listening_history/listening_hist
 import 'package:mate_player/presentation/cubits/music_bar_slider/slider_music_bar_cubit.dart';
 import 'package:mate_player/presentation/cubits/permission/permission_cubit.dart';
 import 'package:mate_player/presentation/cubits/picture/pictures_cubit.dart';
+import 'package:mate_player/presentation/cubits/playback_speed/playback_speed_cubit.dart';
 import 'package:mate_player/presentation/cubits/player/player_cubit.dart';
 import 'package:mate_player/presentation/cubits/playlist/playlist_cubit.dart';
 import 'package:mate_player/presentation/cubits/playlist_screen/playlist_screen_cubit.dart';
@@ -327,6 +328,7 @@ class MusicApp extends StatelessWidget {
             lazy: false,
             create: (context) => PermissionCubit()..checkPermissions(),
           ),
+          BlocProvider(create: (context) => PlaybackSpeedCubit(audioPlayerRepository: audioPlayerRepository)),
         ],
         child: App(router: router),
       ),
