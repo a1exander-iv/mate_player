@@ -1,5 +1,5 @@
 import 'package:audioplayers/audioplayers.dart' show PlayerState;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide RepeatMode;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mate_player/domain/models/track_model.dart';
 import 'package:mate_player/l10n/generated/app_localizations.dart';
