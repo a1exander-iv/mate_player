@@ -88,8 +88,9 @@ class MobileMusicBar extends StatelessWidget {
                           trackShortInfoState.playingTrack.fileBaseName,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onPrimaryContainer,
-                        fontSize: 14,
+                        fontSize: 16,
                         overflow: TextOverflow.ellipsis,
+                        fontWeight: FontWeight.bold
                       ),
                     ),
                     subtitle: Text(

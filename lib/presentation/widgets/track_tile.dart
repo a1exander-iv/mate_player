@@ -143,6 +143,7 @@ class TrackTileTemplate extends StatelessWidget {
                                   ).inSeconds,
                                 ),
                                 textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                               );
                             } else {
                               return const SizedBox.shrink();

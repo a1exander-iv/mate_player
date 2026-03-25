@@ -105,7 +105,7 @@ class TrackShortInfoMusicBar extends StatelessWidget {
                           state.playingTrack.trackTitle ??
                               playingTrack.fileBaseName,
                           style: textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                              ?.copyWith(fontWeight: FontWeight.w600, fontSize: 20),
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
@@ -113,7 +113,7 @@ class TrackShortInfoMusicBar extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .titleSmall
-                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                              ?.copyWith(color: colorScheme.onSurfaceVariant, fontSize: 16),
                           overflow: TextOverflow.ellipsis,
                         )
                       ],
@@ -366,7 +366,7 @@ class ControlPanelMusicBar extends StatelessWidget {
                           width: 60,
                           alignment: Alignment.centerRight,
                           child: Text(secondsToString(
-                              state.currentPosition.inSeconds))),
+                              state.currentPosition.inSeconds), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),)),
                       Expanded(
                         child: Padding(
                           padding:
@@ -396,7 +396,7 @@ class ControlPanelMusicBar extends StatelessWidget {
                           width: 60,
                           alignment: Alignment.centerLeft,
                           child:
-                              Text(secondsToString((trackDuration.inSeconds)))),
+                              Text(secondsToString((trackDuration.inSeconds)), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),)),
                     ],
                   );
                 },
@@ -686,7 +686,6 @@ class _PlaybackRatePopupItemState extends State<PlaybackRatePopupItem> {
     super.initState();
     _autoClose(context);
   }
-
   @override
   Widget build(BuildContext context) {
     ColorScheme colorScheme = Theme.of(context).colorScheme;

@@ -27,7 +27,7 @@ class SequenceListWidget extends StatelessWidget {
                   ),
                 ),
                 const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
-                SliverToBoxAdapter(child: Center(child: Text(AppLocalizations.of(context)!.nextSequenceList))),
+                SliverToBoxAdapter(child: Center(child: Text(AppLocalizations.of(context)!.nextSequenceList, style: TextStyle(fontSize: 16),),),),
                 const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
                 Builder(builder: (context) {
                   List<Widget> playerInfoWidgetList = [];

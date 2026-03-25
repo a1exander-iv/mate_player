@@ -46,7 +46,7 @@ class PlayerScreen extends StatelessWidget {
                       Padding(
                           padding: EdgeInsets.only(left: 8, right: 8, top: 8),
                           child: TopAppBar(
-                            title: Text(AppLocalizations.of(context)!.audioQueue),
+                            title: Text(AppLocalizations.of(context)!.audioQueue,),
                           )),
                       Flexible(
                         child: Padding(
@@ -475,12 +475,16 @@ class ControlPanelPlayerScreen extends StatelessWidget {
                             width: 60,
                             alignment: Alignment.centerLeft,
                             child: Text(secondsToString(
-                                state.currentPosition.inSeconds))),
+                                state.currentPosition.inSeconds), style: TextStyle(
+                                  fontSize: 16
+                                ),)),
                         Container(
                             width: 60,
                             alignment: Alignment.centerRight,
                             child: Text(
-                                secondsToString((trackDuration.inSeconds)))),
+                                secondsToString((trackDuration.inSeconds)), style: TextStyle(
+                                  fontSize: 16
+                                ),)),
                       ],
                     ),
                   ],
