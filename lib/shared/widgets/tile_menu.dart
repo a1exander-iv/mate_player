@@ -41,7 +41,52 @@ class TrackTileMenu extends StatelessWidget {
                     await showTrackInformationModalSideSheet(
                         context: context, track: track);
                   }),
+              SubmenuPlaylistSelection(track: track,),
             ]);
+  }
+}
+
+class SubmenuPlaylistSelection extends StatefulWidget {
+  const SubmenuPlaylistSelection({super.key, required this.track});
+
+  final TrackModel track;
+
+  @override
+  State<SubmenuPlaylistSelection> createState() => _SubmenuPlaylistSelectionState();
+}
+
+class _SubmenuPlaylistSelectionState extends State<SubmenuPlaylistSelection> {
+
+  late PlaylistCubit _playlistCubit;
+  @override
+  void initState() {
+    _playlistCubit = context.read<PlaylistCubit>();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<PlaylistCubit, PlaylistState>(
+      builder: (context, state) {
+        final List<MenuItemButton> submenuList = [];
+        if (state is PlaylistCatalogLoadComplete) {
+          for (var playlist in state.playlistCatalog) {
+            submenuList.add(MenuItemButton(
+              requestFocusOnHover: false,
+              onPressed: () async {
+              await _playlistCubit.addTrackToPlaylist(playlistId: playlist.id, trackId: widget.track.id);
+            }, child: Text(playlist.name ?? "${AppLocalizations.of(context)?.playlistDefaultName} ${playlist.id}",), ));
+          }
+        }
+        return SubmenuButton(
+          onClose: () {
+            FocusScope.of(context).unfocus();
+          },
+          menuChildren: submenuList, leadingIcon: Icon(Icons.library_add_outlined),
+               child: Text(AppLocalizations.of(context)?.addToPlaylist ?? ""),);
+      }
+
+    );
   }
 }
 

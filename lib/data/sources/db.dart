@@ -340,6 +340,26 @@ class AppDatabase extends _$AppDatabase {
     ));
   }
 
+  Future<void> addTrackToPlaylist({required int playlistId, required int trackId}) async {
+
+    List<int> playlistTrackIdsList = await getPlaylistTracksIdsList(playlistId);
+    
+    if (playlistTrackIdsList.contains(trackId)) return;
+    
+    final playlistTrackList = await (select(playlistTrack)
+          ..where((t) => t.playlistId.equals(playlistId))
+          ..orderBy(
+              [(playlistTrack) => OrderingTerm.asc(playlistTrack.position)]))
+        .get();
+    
+    await batch((batch) {
+    for (var track in playlistTrackList) {
+      batch.update(playlistTrack,PlaylistTrackCompanion(trackId: Value(track.trackId), playlistId: Value(playlistId), position: Value(track.position + 1)), where: (table) => table.playlistId.equals(playlistId) & table.trackId.equals(track.trackId),);
+    }
+    batch.insert(playlistTrack, PlaylistTrackCompanion.insert(trackId: trackId, playlistId: playlistId, position: 0));
+    });
+
+  }
   Stream<List<PlaylistData>> watchAllPlaylists() => (select(playlist)
         ..orderBy([(playlist) => OrderingTerm.desc(playlist.createdTime)]))
       .watch();

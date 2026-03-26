@@ -395,4 +395,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get trackTileList => 'Список';
+
+  @override
+  String get addToPlaylist => 'Добавить в плейлист';
 }

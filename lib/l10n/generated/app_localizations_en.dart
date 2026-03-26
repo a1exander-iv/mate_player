@@ -393,4 +393,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trackTileList => 'List';
+
+  @override
+  String get addToPlaylist => 'Add to playlist';
 }

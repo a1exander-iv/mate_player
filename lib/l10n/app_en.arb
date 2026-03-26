@@ -158,6 +158,7 @@
 
   "trackDisplayOption": "Track display option",
   "trackGridList": "Grid",
-  "trackTileList": "List"
+  "trackTileList": "List",
+  "addToPlaylist": "Add to playlist"
 
 }

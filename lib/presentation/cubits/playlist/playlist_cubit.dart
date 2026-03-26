@@ -80,4 +80,8 @@ class PlaylistCubit extends Cubit<PlaylistState> {
   Future<int> getTotalPlaylists() async {
     return await _databaseRepository.getTotalPlaylists();
   }
+
+  Future<void> addTrackToPlaylist({required int playlistId, required int trackId}) async {
+    await _databaseRepository.addTrackToPlaylist(trackId: trackId, playlistId: playlistId);
+  }
 }

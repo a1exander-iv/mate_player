@@ -170,6 +170,7 @@ class DatabaseRepository {
   Future removeTrackFromPlaylist(
           {required int playlistId, required int trackId}) =>
       _appDatabase.removeTrackFromPlaylist(playlistId, trackId);
+  Future addTrackToPlaylist({required int trackId, required int playlistId}) => _appDatabase.addTrackToPlaylist(playlistId: playlistId, trackId: trackId);
   Future editPlaylist(
           {required int playlistId,
           required String? name,
