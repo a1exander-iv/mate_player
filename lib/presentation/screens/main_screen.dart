@@ -17,6 +17,7 @@ import 'package:mate_player/presentation/widgets/track_tile.dart'
 import 'package:mate_player/shared/utils/folder_selection.dart';
 import 'package:mate_player/shared/widgets/add_button.dart';
 import 'package:mate_player/shared/widgets/mobile_music_bar.dart';
+import 'package:mate_player/shared/widgets/scroll_to_top_button.dart';
 import 'package:mate_player/shared/widgets/track_list_type_selection.dart';
 
 class MainScreen extends StatelessWidget {
@@ -63,7 +64,7 @@ class MainScreen extends StatelessWidget {
 }
 
 class MainScreenLayout extends StatelessWidget {
-  const MainScreenLayout({
+  MainScreenLayout({
     super.key,
     required this.leftContentPadding,
     required this.rightContentPadding,
@@ -73,128 +74,136 @@ class MainScreenLayout extends StatelessWidget {
   final double leftContentPadding;
   final double rightContentPadding;
   final bool isMobileLayout;
+  final ScrollController scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
-    return CustomScrollView(slivers: [
-      SliverToBoxAdapter(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                  left: leftContentPadding, right: rightContentPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SearchBarWidget(),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                  left: leftContentPadding, right: rightContentPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  BlocBuilder<PlaylistCubit, PlaylistState>(
-                      builder: (context, state) {
-                    if (state is PlaylistCatalogLoadComplete &&
-                        state.playlistCatalog.isNotEmpty) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 20, bottom: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  AppLocalizations.of(context)!.playlistsHeadline,
-                                  style: isMobileLayout
-                                      ? textTheme.headlineMedium
-                                      : textTheme.headlineLarge,
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 0),
-                            child: PlaylistWidget(
-                              playlistCatalog: state.playlistCatalog,
-                            ),
-                          ),
-                        ],
-                      );
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  }),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 20,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            AppLocalizations.of(context)!.tracksHeadline,
-                            style: isMobileLayout
-                                ? textTheme.headlineMedium
-                                : textTheme.headlineLarge,
-                          ),
-                        ),
-                        Row(children: [
-                        TrackListTypeSelection(),
-                        SortMainListMenu(),
-                        ],)
-                        
-                      ],
-                    ),
+    return Stack(
+      children: [
+        CustomScrollView(
+          controller: scrollController,
+          slivers: [
+          SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: leftContentPadding, right: rightContentPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SearchBarWidget(),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: leftContentPadding, right: rightContentPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      BlocBuilder<PlaylistCubit, PlaylistState>(
+                          builder: (context, state) {
+                        if (state is PlaylistCatalogLoadComplete &&
+                            state.playlistCatalog.isNotEmpty) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20, bottom: 16),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context)!.playlistsHeadline,
+                                      style: isMobileLayout
+                                          ? textTheme.headlineMedium
+                                          : textTheme.headlineLarge,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 0),
+                                child: PlaylistWidget(
+                                  playlistCatalog: state.playlistCatalog,
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      }),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: 20,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                AppLocalizations.of(context)!.tracksHeadline,
+                                style: isMobileLayout
+                                    ? textTheme.headlineMedium
+                                    : textTheme.headlineLarge,
+                              ),
+                            ),
+                            Row(children: [
+                            TrackListTypeSelection(),
+                            SortMainListMenu(),
+                            ],)
+                            
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      SliverPadding(
-        padding: EdgeInsets.only(
-          left: leftContentPadding,
-          right: rightContentPadding,
-          top: 20,
-        ),
-        sliver: BlocBuilder<AudioLoaderCubit, AudioLoaderState>(
-          builder: (context, audioLoaderState) {
-            return BlocBuilder<SettingsCubit, SettingsState>(
-              builder: (context, settingsState) {
-              
-              if (audioLoaderState is AudioLoadComplete) {
-
-                switch (settingsState.listType) {
-                  case ListTypeEnum.gridView:
-                    return TrackGridList(trackList: audioLoaderState.audioList);
-                  case ListTypeEnum.listView:
-                    return TrackList(audioList: audioLoaderState.audioList);
-                }
-
-              } else {
-            
-                switch (settingsState.listType) {
-                  case ListTypeEnum.gridView:
-                    return SkeletonGridList();
-                  case ListTypeEnum.listView:
-                    return SkeletonTrackListTemplate();
-                }
-              }
-            },);
-          },
-        ),
-      )
-    ]);
+          ),
+          SliverPadding(
+            padding: EdgeInsets.only(
+              left: leftContentPadding,
+              right: rightContentPadding,
+              top: 20,
+            ),
+            sliver: BlocBuilder<AudioLoaderCubit, AudioLoaderState>(
+              builder: (context, audioLoaderState) {
+                return BlocBuilder<SettingsCubit, SettingsState>(
+                  builder: (context, settingsState) {
+                  
+                  if (audioLoaderState is AudioLoadComplete) {
+        
+                    switch (settingsState.listType) {
+                      case ListTypeEnum.gridView:
+                        return TrackGridList(trackList: audioLoaderState.audioList);
+                      case ListTypeEnum.listView:
+                        return TrackList(audioList: audioLoaderState.audioList);
+                    }
+        
+                  } else {
+                
+                    switch (settingsState.listType) {
+                      case ListTypeEnum.gridView:
+                        return SkeletonGridList();
+                      case ListTypeEnum.listView:
+                        return SkeletonTrackListTemplate();
+                    }
+                  }
+                },);
+              },
+            ),
+          ),
+        ]),
+        ScrollToTopFloatingButton(scrollController: scrollController)
+        ],
+    );
   }
 }
 
@@ -551,3 +560,4 @@ class MobileMainScreenLayout extends StatelessWidget {
         ));
   }
 }
+

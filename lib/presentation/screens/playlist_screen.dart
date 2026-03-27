@@ -21,6 +21,7 @@ import 'package:mate_player/shared/widgets/image_placeholder.dart';
 import 'package:mate_player/shared/widgets/mobile_music_bar.dart';
 import 'package:mate_player/shared/widgets/music_bar.dart';
 import 'package:mate_player/shared/widgets/play_and_pause_button.dart';
+import 'package:mate_player/shared/widgets/scroll_to_top_button.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 enum PlaylistTrackTilePopupButtonValues { trackDetails, deleteFromPlaylist }
@@ -109,6 +110,7 @@ class _PlaylistDesktopScreenState extends State<PlaylistDesktopScreen> {
   final double leftContentPadding = 75.0;
   late final PlaylistScreenCubit playlistScreenCubit;
   late final PlayerCubit playerCubit;
+  final ScrollController scrollController = ScrollController();
   @override
   void initState() {
     playlistScreenCubit = context.read<PlaylistScreenCubit>();
@@ -121,205 +123,211 @@ class _PlaylistDesktopScreenState extends State<PlaylistDesktopScreen> {
     ColorScheme colorScheme = Theme.of(context).colorScheme;
     TextTheme textTheme = Theme.of(context).textTheme;
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Column(
-            children: [
-              Container(
-                color: colorScheme.surfaceContainer,
-                child: SafeArea(
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                            bottomRight: Radius.circular(16),
-                            bottomLeft: Radius.circular(16))),
-                    height: 400,
-                    child: BlocBuilder<PlaylistScreenCubit, PlaylistScreenState>(
-                      builder: (context, state) {
-                        if (state is PlaylistLoadComplete) {
-                          final PlaylistModel playlistData = state.playlistData;
-                
-                          final (int hours, int minutes, int seconds) =
-                              playlistDurationInfoCalc(state.playlistTrackList);
-                
-                          if (playerCubit.getCurrentPlayingPlaylist != null &&
-                              playerCubit.getCurrentPlayingPlaylist ==
-                                  playlistData.id) {
-                            List<int> trackSequenceIdList = playerCubit
-                                .getTrackSequenceList
-                                .map((element) => element.id)
-                                .toList();
-                
-                            if (!listEquals(
-                                trackSequenceIdList, state.playlistTrackList)) {
-                              context.read<PlayerCubit>().setTrackSequenceList =
-                                  state.playlistTrackList;
-                            }
-                          }
-                
-                          return Column(
-                            children: [
-                              PlaylistScreenAppBar(
-                                playlistId: playlistData.id,
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                    left: leftContentPadding, top: 30),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Stack(
+    return Stack(
+      children: [
+        CustomScrollView(
+          controller: scrollController,
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  Container(
+                    color: colorScheme.surfaceContainer,
+                    child: SafeArea(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.only(
+                                bottomRight: Radius.circular(16),
+                                bottomLeft: Radius.circular(16))),
+                        height: 400,
+                        child: BlocBuilder<PlaylistScreenCubit, PlaylistScreenState>(
+                          builder: (context, state) {
+                            if (state is PlaylistLoadComplete) {
+                              final PlaylistModel playlistData = state.playlistData;
+                    
+                              final (int hours, int minutes, int seconds) =
+                                  playlistDurationInfoCalc(state.playlistTrackList);
+                    
+                              if (playerCubit.getCurrentPlayingPlaylist != null &&
+                                  playerCubit.getCurrentPlayingPlaylist ==
+                                      playlistData.id) {
+                                List<int> trackSequenceIdList = playerCubit
+                                    .getTrackSequenceList
+                                    .map((element) => element.id)
+                                    .toList();
+                    
+                                if (!listEquals(
+                                    trackSequenceIdList, state.playlistTrackList)) {
+                                  context.read<PlayerCubit>().setTrackSequenceList =
+                                      state.playlistTrackList;
+                                }
+                              }
+                    
+                              return Column(
+                                children: [
+                                  PlaylistScreenAppBar(
+                                    playlistId: playlistData.id,
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.only(
+                                        left: leftContentPadding, top: 30),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
-                                        ImageFiltered(
-                                          imageFilter: ImageFilter.blur(
-                                            sigmaX: 100,
-                                            sigmaY: 50,
-                                          ),
-                                          child: PlaylistImagePlaceholder(
-                                              width: 264,
-                                              height: 264,
-                                              cachedHeight: 264,
-                                              cachedWidth: 264,
-                                              imageFit: BoxFit.cover,
-                                              imagePath: playlistData.imagePath,
-                                              icon: Icons.library_music,
-                                              iconSize: 64),
-                                        ),
-                                        PlaylistImagePlaceholder(
-                                            width: 264,
-                                            height: 264,
-                                            cachedHeight: 528,
-                                            cachedWidth: 528,
-                                            imageFit: BoxFit.cover,
-                                            imagePath: playlistData.imagePath,
-                                            icon: Icons.library_music,
-                                            iconSize: 64),
-                                      ],
-                                    ),
-                                    Flexible(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 16),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                        Stack(
                                           children: [
-                                            Column(
+                                            ImageFiltered(
+                                              imageFilter: ImageFilter.blur(
+                                                sigmaX: 100,
+                                                sigmaY: 50,
+                                              ),
+                                              child: PlaylistImagePlaceholder(
+                                                  width: 264,
+                                                  height: 264,
+                                                  cachedHeight: 264,
+                                                  cachedWidth: 264,
+                                                  imageFit: BoxFit.cover,
+                                                  imagePath: playlistData.imagePath,
+                                                  icon: Icons.library_music,
+                                                  iconSize: 64),
+                                            ),
+                                            PlaylistImagePlaceholder(
+                                                width: 264,
+                                                height: 264,
+                                                cachedHeight: 528,
+                                                cachedWidth: 528,
+                                                imageFit: BoxFit.cover,
+                                                imagePath: playlistData.imagePath,
+                                                icon: Icons.library_music,
+                                                iconSize: 64),
+                                          ],
+                                        ),
+                                        Flexible(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 16),
+                                            child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                ConstrainedBox(
-                                                    constraints: BoxConstraints(
-                                                        maxWidth: 700,
-                                                        minWidth: 300,
-                                                        maxHeight: 100),
-                                                    child: Builder(
-                                                        builder: (context) {
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    ConstrainedBox(
+                                                        constraints: BoxConstraints(
+                                                            maxWidth: 700,
+                                                            minWidth: 300,
+                                                            maxHeight: 100),
+                                                        child: Builder(
+                                                            builder: (context) {
+                                                          return Text(
+                                                            playlistData.name ==
+                                                                        null ||
+                                                                    playlistData
+                                                                        .name!.isEmpty
+                                                                ? "${AppLocalizations.of(context)!.playlistDefaultName} ${widget.playlistNumber}"
+                                                                : playlistData.name!,
+                                                            style: textTheme
+                                                                .headlineLarge
+                                                                ?.copyWith(
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .fade,
+                                                                    height: 1),
+                                                          );
+                                                        })),
+                                                    const Gap(8),
+                                                    Builder(builder: (context) {
+                                                      String playlistDurationString =
+                                                          "";
+                                                      playlistDurationString +=
+                                                          "${state.playlistTrackList.length} ${AppLocalizations.of(context)?.nTracks(state.playlistTrackList.length)},";
+                    
+                                                      if (hours > 0) {
+                                                        playlistDurationString +=
+                                                            " $hours ${AppLocalizations.of(context)?.nHours(hours)}";
+                                                      }
+                    
+                                                      playlistDurationString +=
+                                                          " $minutes ${AppLocalizations.of(context)?.shortMinute}";
+                                                      playlistDurationString +=
+                                                          " $seconds ${AppLocalizations.of(context)?.shortSecond}";
+                    
                                                       return Text(
-                                                        playlistData.name ==
-                                                                    null ||
-                                                                playlistData
-                                                                    .name!.isEmpty
-                                                            ? "${AppLocalizations.of(context)!.playlistDefaultName} ${widget.playlistNumber}"
-                                                            : playlistData.name!,
-                                                        style: textTheme
-                                                            .headlineLarge
+                                                        playlistDurationString,
+                                                        style: textTheme.titleMedium
                                                             ?.copyWith(
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .fade,
-                                                                height: 1),
+                                                                fontSize: 24,
+                                                                overflow: TextOverflow
+                                                                    .ellipsis),
                                                       );
-                                                    })),
-                                                const Gap(8),
-                                                Builder(builder: (context) {
-                                                  String playlistDurationString =
-                                                      "";
-                                                  playlistDurationString +=
-                                                      "${state.playlistTrackList.length} ${AppLocalizations.of(context)?.nTracks(state.playlistTrackList.length)},";
-                
-                                                  if (hours > 0) {
-                                                    playlistDurationString +=
-                                                        " $hours ${AppLocalizations.of(context)?.nHours(hours)}";
-                                                  }
-                
-                                                  playlistDurationString +=
-                                                      " $minutes ${AppLocalizations.of(context)?.shortMinute}";
-                                                  playlistDurationString +=
-                                                      " $seconds ${AppLocalizations.of(context)?.shortSecond}";
-                
-                                                  return Text(
-                                                    playlistDurationString,
-                                                    style: textTheme.titleMedium
-                                                        ?.copyWith(
-                                                            fontSize: 24,
-                                                            overflow: TextOverflow
-                                                                .ellipsis),
-                                                  );
-                                                }),
+                                                    }),
+                                                  ],
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(top: 32),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.center,
+                                                    children: [
+                                                      PlaylistPlayAndPause(
+                                                        playlistId: playlistData.id,
+                                                        onPressed: () {
+                                                          context
+                                                              .read<PlayerCubit>()
+                                                              .playlistPlayAndPause(
+                                                                  state
+                                                                      .playlistTrackList,
+                                                                  state.playlistData
+                                                                      .id);
+                                                        },
+                                                        iconSize: 48,
+                                                      ),
+                                                      const Gap(8),
+                                                      LikeButtonPlaylist(
+                                                        playlistId: playlistData.id,
+                                                        size: 48,
+                                                      )
+                                                    ],
+                                                  ),
+                                                )
                                               ],
                                             ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.only(top: 32),
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  PlaylistPlayAndPause(
-                                                    playlistId: playlistData.id,
-                                                    onPressed: () {
-                                                      context
-                                                          .read<PlayerCubit>()
-                                                          .playlistPlayAndPause(
-                                                              state
-                                                                  .playlistTrackList,
-                                                              state.playlistData
-                                                                  .id);
-                                                    },
-                                                    iconSize: 48,
-                                                  ),
-                                                  const Gap(8),
-                                                  LikeButtonPlaylist(
-                                                    playlistId: playlistData.id,
-                                                    size: 48,
-                                                  )
-                                                ],
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        } else {
-                          return Column(
-                            children: [
-                              PlaylistScreenAppBar(
-                                playlistId: widget.playlistId,
-                              ),
-                              Skeletonizer(
-                                  child: PlaylistDesktopSkeleton(
-                                      leftContentPadding: leftContentPadding)),
-                            ],
-                          );
-                        }
-                      },
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return Column(
+                                children: [
+                                  PlaylistScreenAppBar(
+                                    playlistId: widget.playlistId,
+                                  ),
+                                  Skeletonizer(
+                                      child: PlaylistDesktopSkeleton(
+                                          leftContentPadding: leftContentPadding)),
+                                ],
+                              );
+                            }
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              )
-            ],
-          ),
+                  )
+                ],
+              ),
+            ),
+            SliverPadding(
+                padding:
+                    EdgeInsets.only(left: leftContentPadding, right: 64, top: 8),
+                sliver: PlaylistTrackList())
+          ],
         ),
-        SliverPadding(
-            padding:
-                EdgeInsets.only(left: leftContentPadding, right: 64, top: 8),
-            sliver: PlaylistTrackList())
+        ScrollToTopFloatingButton(scrollController: scrollController)
       ],
     );
   }
@@ -572,6 +580,7 @@ class _PlaylistMobileScreenState extends State<PlaylistMobileScreen> {
 
   late final PlaylistScreenCubit playlistScreenCubit;
   late final PlayerCubit playerCubit;
+  final ScrollController scrollController = ScrollController();
   @override
   void initState() {
     playlistScreenCubit = context.read<PlaylistScreenCubit>();
@@ -588,6 +597,7 @@ class _PlaylistMobileScreenState extends State<PlaylistMobileScreen> {
       alignment: Alignment.bottomCenter,
       children: [
         CustomScrollView(
+          controller: scrollController,
           slivers: [
             SliverToBoxAdapter(
               child: Column(
@@ -820,7 +830,8 @@ class _PlaylistMobileScreenState extends State<PlaylistMobileScreen> {
               return const SizedBox.shrink();
             }
           },
-        )
+        ),
+        ScrollToTopFloatingButton(scrollController: scrollController, isMobilePlaylistScreen: true,)
       ],
     );
   }

@@ -11,6 +11,7 @@ import 'package:mate_player/presentation/screens/main_screen.dart';
 import 'package:mate_player/presentation/widgets/playlist_widget.dart';
 import 'package:mate_player/presentation/widgets/track_grid_tile.dart';
 import 'package:mate_player/shared/widgets/mobile_music_bar.dart';
+import 'package:mate_player/shared/widgets/scroll_to_top_button.dart';
 
 class FavoriteScreen extends StatelessWidget {
   const FavoriteScreen({super.key});
@@ -93,7 +94,7 @@ class FavoriteScreenMobileLayout extends StatelessWidget {
 }
 
 class FavoriteScreenLayout extends StatelessWidget {
-  const FavoriteScreenLayout({
+  FavoriteScreenLayout({
     super.key,
     required this.leftContentPadding,
     required this.rightContentPadding,
@@ -103,6 +104,8 @@ class FavoriteScreenLayout extends StatelessWidget {
   final double leftContentPadding;
   final double rightContentPadding;
   final bool isMobileLayout;
+  final ScrollController scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -113,97 +116,103 @@ class FavoriteScreenLayout extends StatelessWidget {
             builder: (context) {
               if (state.favoritePlaylistData.isNotEmpty ||
                   state.favoriteTrackData.isNotEmpty) {
-                return CustomScrollView(
-                  slivers: [
-                    SliverPadding(
-                      padding: EdgeInsets.only(
-                        top: 8,
-                        left: leftContentPadding,
-                        right: rightContentPadding,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: Builder(
-                          builder: (context) {
-                            if (state.favoritePlaylistData.isNotEmpty) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 20,
-                                      bottom: 16,
-                                    ),
-                                    child: Text(
-                                      AppLocalizations.of(
-                                        context,
-                                      )!.favoritePlaylistsHeadline,
-                                      style: isMobileLayout
-                                          ? textTheme.headlineMedium
-                                          : textTheme.headlineLarge,
-                                    ),
-                                  ),
-                                  PlaylistWidget(
-                                    playlistCatalog: state
-                                        .favoritePlaylistData
-                                        .reversed
-                                        .toList(),
-                                  ),
-                                ],
-                              );
-                            } else {
-                              return const SizedBox.shrink();
-                            }
-                          },
+                return Stack(
+                  children: [
+                    CustomScrollView(
+                      controller: scrollController,
+                      slivers: [
+                        SliverPadding(
+                          padding: EdgeInsets.only(
+                            top: 8,
+                            left: leftContentPadding,
+                            right: rightContentPadding,
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: Builder(
+                              builder: (context) {
+                                if (state.favoritePlaylistData.isNotEmpty) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 20,
+                                          bottom: 16,
+                                        ),
+                                        child: Text(
+                                          AppLocalizations.of(
+                                            context,
+                                          )!.favoritePlaylistsHeadline,
+                                          style: isMobileLayout
+                                              ? textTheme.headlineMedium
+                                              : textTheme.headlineLarge,
+                                        ),
+                                      ),
+                                      PlaylistWidget(
+                                        playlistCatalog: state
+                                            .favoritePlaylistData
+                                            .reversed
+                                            .toList(),
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              },
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    SliverPadding(
-                      padding: EdgeInsets.only(
-                        top: 20,
-                        left: leftContentPadding,
-                        right: rightContentPadding,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: Builder(
-                          builder: (context) {
-                            if (state.favoriteTrackData.isNotEmpty) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    )!.favoriteTracksHeadline,
-                                    style: isMobileLayout
-                                        ? textTheme.headlineMedium
-                                        : textTheme.headlineLarge,
-                                  ),
-                                ],
-                              );
-                            } else {
-                              return const SizedBox.shrink();
-                            }
-                          },
+                        SliverPadding(
+                          padding: EdgeInsets.only(
+                            top: 20,
+                            left: leftContentPadding,
+                            right: rightContentPadding,
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: Builder(
+                              builder: (context) {
+                                if (state.favoriteTrackData.isNotEmpty) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        )!.favoriteTracksHeadline,
+                                        style: isMobileLayout
+                                            ? textTheme.headlineMedium
+                                            : textTheme.headlineLarge,
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              },
+                            ),
+                          ),
                         ),
-                      ),
+                        SliverPadding(
+                          padding: EdgeInsets.only(
+                            top: 20,
+                            left: leftContentPadding,
+                            right: rightContentPadding,
+                          ),
+                          sliver: BlocBuilder<SettingsCubit, SettingsState>(
+                            builder: (context, settingsState) {
+                              
+                              if (settingsState.listType == ListTypeEnum.gridView) {
+                                return TrackGridList(trackList: state.favoriteTrackData);
+                              } else {
+                                return TrackList(audioList: state.favoriteTrackData);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    SliverPadding(
-                      padding: EdgeInsets.only(
-                        top: 20,
-                        left: leftContentPadding,
-                        right: rightContentPadding,
-                      ),
-                      sliver: BlocBuilder<SettingsCubit, SettingsState>(
-                        builder: (context, settingsState) {
-                          
-                          if (settingsState.listType == ListTypeEnum.gridView) {
-                            return TrackGridList(trackList: state.favoriteTrackData);
-                          } else {
-                            return TrackList(audioList: state.favoriteTrackData);
-                          }
-                        },
-                      ),
-                    ),
+                    ScrollToTopFloatingButton(scrollController: scrollController)
                   ],
                 );
               } else {
